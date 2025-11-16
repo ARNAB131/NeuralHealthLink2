@@ -1,34 +1,18 @@
-import os
+from pathlib import Path
 
-# === Root directory ===
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = Path(__file__).resolve().parents[1]
 
-# === Data paths ===
-DATA_DIR = os.path.join(BASE_DIR, "data")
-
-PATIENTS_CSV = os.path.join(DATA_DIR, "patients.csv")
-DISEASES_CSV = os.path.join(DATA_DIR, "diseases.csv")
-RELATIONS_JSON = os.path.join(DATA_DIR, "relations.json")
-
-# === App meta ===
-APP_NAME = "Neural Health Link (Mock)"
+APP_NAME = "Neural Health Link"
 VERSION = "1.0"
-AUTHOR = "Arnab Deb"
-DEBUG = True
-
-# === Flask settings ===
-HOST = "0.0.0.0"
-PORT = 5000
-SECRET_KEY = "change_this_for_prod"
-
-# === UI config ===
-DEFAULT_THEME = "light"
-LOGO_PATH = "/static/images/logo.png"
-
-# === Localization ===
+AUTHOR = "Doctigo"
 DEFAULT_COUNTRY = "India"
-DATE_FORMAT = "%Y-%m-%d"
 
-# === Misc ===
-CACHE_TIMEOUT = 300  # seconds
-MAX_RELATION_DEPTH = 3  # A, B, C combinations limit
+HOST = "0.0.0.0"
+PORT = 8080
+DEBUG = False
+
+DATA_DIR = BASE_DIR / "data"
+PATIENTS_CSV = "data/patients.csv"
+DISEASES_CSV = "data/diseases.csv"
+RELATIONS_JSON = "data/relations.json"
+STATE_DISEASES_JSON = "data/state_diseases.json"
