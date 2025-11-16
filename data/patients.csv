@@ -1,0 +1,6 @@
+patient_id,name,age,gender,city,state,last_visit,present_disease,previous_diseases
+1001,Rohan Sharma,42,Male,Mumbai,Maharashtra,2025-09-21,Fever,Cough|Headache
+1002,Priya Nair,35,Female,Kochi,Kerala,2025-10-05,Shortness of Breath,Fever|Chest Pain
+1003,Aarav Singh,29,Male,Delhi,Delhi,2025-08-30,Headache,Cold|Cough|Fever
+1004,Kavita Das,50,Female,Kolkata,West Bengal,2025-09-10,Chest Pain,Shortness of Breath|Fatigue
+1005,Rakesh Mehta,60,Male,Jaipur,Rajasthan,2025-10-10,Cough,Fever|Body Ache

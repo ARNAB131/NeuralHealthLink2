@@ -1,0 +1,9 @@
+disease_name,category,common_symptoms,description
+Fever,Infectious,"High temperature|Fatigue|Body Ache","Rise in body temperature due to infection."
+Cough,Respiratory,"Throat irritation|Phlegm|Chest discomfort","Reflex to clear airways of mucus or irritants."
+Headache,Neurological,"Pain in head|Sensitivity to light|Nausea","Pain or discomfort in the head or scalp."
+Shortness of Breath,Respiratory,"Breathing difficulty|Chest tightness|Fatigue","Feeling of not getting enough air."
+Chest Pain,Cardiovascular,"Tightness|Pressure|Pain radiating to arm","Often related to heart or lung disorders."
+Cold,Infectious,"Runny nose|Sneezing|Mild cough","Viral infection of the upper respiratory tract."
+Fatigue,General,"Weakness|Low energy|Sleep disturbance","Persistent tiredness not relieved by rest."
+Body Ache,General,"Muscle pain|Fatigue|Joint pain","Widespread discomfort often due to viral infection."

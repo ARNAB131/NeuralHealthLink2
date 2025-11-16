@@ -1,0 +1,68 @@
+{
+  "Fever": {
+    "Cough": {
+      "probability": 0.78,
+      "report": "Frequent linkage observed due to viral infections causing both fever and cough."
+    },
+    "Headache": {
+      "probability": 0.64,
+      "report": "Fever often triggers vascular headaches due to dehydration and heat exposure."
+    },
+    "Shortness of Breath": {
+      "probability": 0.52,
+      "report": "Prolonged fever from respiratory infections can induce breathlessness."
+    },
+    "Body Ache": {
+      "probability": 0.69,
+      "report": "Fever commonly accompanies body aches in flu or viral syndromes."
+    }
+  },
+  "Cough": {
+    "Fever": {
+      "probability": 0.76,
+      "report": "Coughing often accompanies fever in common cold and influenza."
+    },
+    "Chest Pain": {
+      "probability": 0.48,
+      "report": "Chronic cough may cause intercostal strain leading to mild chest discomfort."
+    },
+    "Body Ache": {
+      "probability": 0.40,
+      "report": "Viral syndromes with cough commonly include diffuse myalgia and malaise."
+    }
+  },
+  "Shortness of Breath": {
+    "Chest Pain": {
+      "probability": 0.81,
+      "report": "Strong correlation; both are symptoms of cardiac or pulmonary conditions."
+    },
+    "Fever": {
+      "probability": 0.37,
+      "report": "Less common link, typically observed in pneumonia or COVID-like infections."
+    }
+  },
+  "Headache": {
+    "Cold": {
+      "probability": 0.42,
+      "report": "Upper respiratory infections commonly present with headache due to sinus inflammation."
+    },
+    "Cough": {
+      "probability": 0.35,
+      "report": "Persistent cough can trigger tension-type headaches via muscle strain and poor sleep."
+    },
+    "Fever": {
+      "probability": 0.62,
+      "report": "Fever frequently coexists with headache from cytokine response and dehydration."
+    }
+  },
+  "Chest Pain": {
+    "Shortness of Breath": {
+      "probability": 0.81,
+      "report": "Cardiopulmonary conditions often produce concurrent chest pain and breathlessness."
+    },
+    "Fatigue": {
+      "probability": 0.46,
+      "report": "Reduced cardiac or pulmonary reserve can manifest as chest discomfort with fatigue."
+    }
+  }
+}
