@@ -1,0 +1,25 @@
+<!-- /frontend/components/cards.html -->
+{% macro summary_card(title, value, subtitle=None, icon=None, color="var(--neon)") %}
+<div class="dashboard-card fade-in">
+  <div style="display:flex;align-items:center;justify-content:space-between;">
+    <h3 style="color:{{ color }};">{{ title }}</h3>
+    {% if icon %}
+    <img src="{{ url_for('static', filename='images/icons/' ~ icon) }}" alt="{{ title }}" width="28" height="28">
+    {% endif %}
+  </div>
+  <p style="font-size:1.6rem;font-weight:600;margin:8px 0;color:{{ color }};">{{ value }}</p>
+  {% if subtitle %}
+  <p class="text-muted" style="margin:0;">{{ subtitle }}</p>
+  {% endif %}
+</div>
+{% endmacro %}
+
+
+{% macro relation_card(prev_disease, probability, report) %}
+<div class="dashboard-card fade-in">
+  <h3>{{ prev_disease }}</h3>
+  <div class="relation-bar"><span style="width: {{ probability }}%;"></span></div>
+  <span class="prob-tag">{{ probability }}%</span>
+  <p class="text-muted" style="margin-top:10px;">{{ report }}</p>
+</div>
+{% endmacro %}
