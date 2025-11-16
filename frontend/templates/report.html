@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% block title %}Report | {{ app_name }}{% endblock %}
+
+{% block content %}
+<h1>Patient Report</h1>
+<p style="margin-bottom:16px;">
+  Detailed relation analysis between <strong>{{ patient.name }}</strong>’s current disease
+  <b>{{ patient.present_disease }}</b> and their past conditions.
+</p>
+<div class="divider"></div>
+
+<div class="block">
+  <h2>Patient Overview</h2>
+  <div class="grid">
+    <div class="col-4">
+      <div class="panel" style="background:#0f1725aa; border:1px solid #ffffff12; padding:16px;">
+        <p><b>ID:</b> {{ patient.patient_id }}</p>
+        <p><b>Name:</b> {{ patient.name }}</p>
+        <p><b>Age:</b> {{ patient.age }}</p>
+        <p><b>Gender:</b> {{ patient.gender }}</p>
+        <p><b>City:</b> {{ patient.city }}</p>
+        <p><b>State:</b> {{ patient.state }}</p>
+        <p><b>Last Visit:</b> {{ patient.last_visit }}</p>
+      </div>
+    </div>
+
+    <div class="col-8">
+      <div class="panel" style="background:#0f1725aa; border:1px solid #ffffff12; padding:16px;">
+        <p><b>Present Disease:</b>
+          <span style="color:#7df9ff;">{{ patient.present_disease }}</span>
+        </p>
+        <p><b>Previous Diseases:</b> {{ patient.previous_diseases }}</p>
+        <p>
+          This section analyzes how past illnesses may influence the current
+          condition using mock probabilities from the dataset.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="block">
+  <h2>Disease Relation Summary</h2>
+  <div class="grid">
+    <div class="col-12">
+      <table style="width:100%; border-collapse:collapse; font-size:0.95rem;">
+        <thead style="background:#111a2d;">
+          <tr style="text-align:left;">
+            <th style="padding:10px; border-bottom:1px solid #ffffff22;">Previous Disease</th>
+            <th style="padding:10px; border-bottom:1px solid #ffffff22;">Relation Probability</th>
+            <th style="padding:10px; border-bottom:1px solid #ffffff22;">Explanation</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for prev, info in relation_data.items() %}
+            {% set p = info.probability | float %}
+            <tr style="background-color:#0f1725aa;">
+              <td style="padding:10px; border-bottom:1px solid #ffffff11;">{{ prev }}</td>
+              <td style="padding:10px; border-bottom:1px solid #ffffff11; color:#7df9ff; font-weight:600;">
+                {% if p > 0 %}{{ (p * 100) | round(1) }}%{% else %}N/A{% endif %}
+              </td>
+              <td style="padding:10px; border-bottom:1px solid #ffffff11; color:#b8c3d9;">
+                {{ info.report }}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="block">
+  <h2>Visual Overview</h2>
+  <canvas id="relationChart" height="120"></canvas>
+</div>
+
+<div class="block">
+  <a href="{{ url_for('main.home') }}" class="btn">← Back to Dashboard</a>
+</div>
+{% endblock %}
+
+{% block after_panel %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// ====== Extract relation probabilities ======
+const rawValues = [
+  {% for prev, info in relation_data.items() %}
+    {{ (info.probability | float) }},
+  {% endfor %}
+].filter(v => !isNaN(v));
+
+// ====== Mean & Standard Deviation ======
+function mean(arr){return arr.reduce((a,b)=>a+b,0)/arr.length;}
+function std(arr,m){return Math.sqrt(arr.reduce((a,b)=>a+Math.pow(b-m,2),0)/arr.length);}
+const m = rawValues.length ? mean(rawValues) : 0;
+const s = rawValues.length ? std(rawValues,m) : 0.01;
+
+// ====== Gaussian generator ======
+function gaussian(x,mean,std){
+  const exp = -((x-mean)**2)/(2*std**2);
+  return (1/(std*Math.sqrt(2*Math.PI)))*Math.exp(exp);
+}
+
+// ====== Generate bell data ======
+const xs=[], ys=[];
+for(let x=0;x<=1;x+=0.01){xs.push(x);ys.push(gaussian(x,m,s));}
+const yMax=Math.max(...ys);
+const scaledYs=ys.map(v=>(v/yMax)*100);
+
+// ====== Chart.js setup ======
+const ctx=document.getElementById('relationChart');
+new Chart(ctx,{
+  type:'line',
+  data:{
+    labels:xs.map(x=>(x*100).toFixed(0)),
+    datasets:[
+      {
+        label:'Normal Distribution of Relation Probabilities',
+        data:scaledYs,
+        borderColor:'rgba(125,249,255,0.9)',
+        backgroundColor:'rgba(125,249,255,0.2)',
+        fill:true,
+        tension:0.4,
+        pointRadius:0
+      }
+    ]
+  },
+  options:{
+    plugins:{
+      legend:{labels:{color:'#e6eef8'}},
+      tooltip:{
+        backgroundColor:'#0e1525',
+        titleColor:'#7df9ff',
+        bodyColor:'#e6eef8',
+        callbacks:{
+          title:ctx=>`Probability: ${ctx[0].label}%`,
+          label:ctx=>`Density: ${ctx.parsed.y.toFixed(3)}`
+        }
+      }
+    },
+    scales:{
+      x:{
+        title:{display:true,text:'Relation Probability (%)',color:'#7df9ff'},
+        ticks:{color:'#99a3b7'},
+        grid:{color:'#1b2340'}
+      },
+      y:{
+        title:{display:true,text:'Relative Density',color:'#7df9ff'},
+        ticks:{color:'#99a3b7'},
+        grid:{color:'#1b2340'}
+      }
+    }
+  }
+});
+
+// ====== Summary section ======
+const statsDiv=document.createElement('div');
+statsDiv.style.color='#b8c3d9';
+statsDiv.style.marginTop='10px';
+statsDiv.style.textAlign='center';
+statsDiv.style.fontSize='0.95rem';
+statsDiv.innerHTML=`
+  <b>Statistical Summary:</b><br>
+  Mean Probability = <span style="color:#7df9ff;">${(m*100).toFixed(2)}%</span>,
+  Standard Deviation = <span style="color:#a78bfa;">${(s*100).toFixed(2)}%</span>
+`;
+document.querySelector('.block:last-of-type').appendChild(statsDiv);
+</script>
+{% endblock %}

@@ -1,0 +1,40 @@
+<!-- /frontend/templates/index.html -->
+{% extends "base.html" %}
+{% block title %}Home | {{ app_name }}{% endblock %}
+
+{% block content %}
+<h1>Patient Dashboard</h1>
+<p>Select a patient to view their disease relations and analysis report.</p>
+<div class="divider"></div>
+
+<div class="block">
+  <form method="get" action="" id="patientForm">
+    <label for="patientSelect" style="font-weight:500;">Choose Patient:</label>
+    <select id="patientSelect" class="btn" style="min-width:200px;" onchange="navigateToPatient(this)">
+      <option value="">-- Select Patient --</option>
+      {% for p in patients %}
+      <option value="{{ p.patient_id }}">{{ p.name }} ({{ p.city }}, {{ p.state }})</option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+
+<div class="block">
+  <h2>System Overview</h2>
+  <p>
+    <b>Neural Health Link</b> An AGENTIC-AI diagnostic correlation tool.
+    The dataset is static and pre-filled, showing how previous diseases like <em>Fever, Cough, Headache, Shortness of Breath</em> relate statistically to a patient's current condition.
+  </p>
+</div>
+
+
+{% endblock %}
+
+{% block after_panel %}
+<script>
+  function navigateToPatient(sel){
+    const id = sel.value;
+    if(id){ window.location.href = `/patient/${id}`; }
+  }
+</script>
+{% endblock %}

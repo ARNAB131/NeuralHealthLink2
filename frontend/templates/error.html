@@ -1,0 +1,29 @@
+<!-- /frontend/templates/error.html -->
+{% extends "base.html" %}
+{% block title %}Error | {{ app_name }}{% endblock %}
+
+{% block content %}
+<div style="text-align:center; padding:40px 0;">
+  <h1 style="font-size:2rem; color:#ff5d73;">⚠ Error</h1>
+  <p style="font-size:1.1rem; margin:16px auto; color:#b8c3d9;">
+    {{ message or "An unexpected error occurred while processing your request." }}
+  </p>
+  <div class="divider" style="margin:20px auto; width:60%;"></div>
+  <p style="color:#99a3b7;">
+    Please return to the dashboard or try again later.
+  </p>
+  <a href="{{ url_for('main.home') }}" class="btn" style="margin-top:20px;">← Back to Dashboard</a>
+</div>
+{% endblock %}
+
+{% block after_panel %}
+<script>
+  // Subtle flicker animation for warning icon
+  const body = document.body;
+  let hue = 0;
+  setInterval(()=>{
+    hue = (hue + 3) % 360;
+    body.style.boxShadow = `0 0 40px 2px hsl(${hue},100%,60%) inset`;
+  },120);
+</script>
+{% endblock %}

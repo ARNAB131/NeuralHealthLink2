@@ -1,0 +1,209 @@
+<!-- /frontend/templates/base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}{{ app_name or "Neural Health Link" }}{% endblock %}</title>
+  <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block head_extra %}{% endblock %}
+
+  <style>
+    :root{
+      --bg:#0b0f18;           /* deep space */
+      --panel:#0f1423aa;      /* translucent card */
+      --stroke:#1b2340;       /* grid lines */
+      --neon:#7df9ff;         /* cyan accent */
+      --neon-2:#a78bfa;       /* violet accent */
+      --text:#e6eef8;         /* primary text */
+      --muted:#99a3b7;        /* secondary text */
+      --success:#30e0a1;
+      --warning:#ffd166;
+      --danger:#ff5d73;
+      --radius:18px;
+      --blur:16px;
+      --shadow:0 10px 30px rgba(0,0,0,.35), inset 0 0 1px #ffffff11;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: 'Outfit', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background: radial-gradient(1200px 800px at 10% -10%, #12203a 0%, transparent 60%),
+                  radial-gradient(1000px 700px at 110% 10%, #1c0f2e 0%, transparent 60%),
+                  var(--bg);
+      overflow-x:hidden;
+    }
+
+    /* animated cyber grid */
+    .bg-grid{
+      position:fixed; inset:0; pointer-events:none; z-index:-2;
+      background:
+        linear-gradient(transparent 95%, rgba(125,249,255,.08) 100%) 0 0/100% 40px,
+        linear-gradient(90deg, transparent 95%, rgba(125,249,255,.08) 100%) 0 0/40px 100%;
+      mask-image: radial-gradient(1200px 800px at 50% -10%, black 60%, transparent 100%);
+      animation:gridMove 20s linear infinite;
+    }
+    @keyframes gridMove{
+      from{background-position:0 0, 0 0}
+      to{background-position:0 40px, 40px 0}
+    }
+
+    /* top neon line */
+    .neon-bar{
+      position:fixed; top:0; left:0; right:0; height:2px; z-index:50;
+      background: linear-gradient(90deg, var(--neon), var(--neon-2));
+      box-shadow: 0 0 12px var(--neon), 0 0 22px var(--neon-2);
+      opacity:.7;
+    }
+
+    /* container */
+    .wrap{
+      max-width:1200px; margin:84px auto 48px; padding:0 20px;
+    }
+
+    /* nav */
+    .nav{
+      position:sticky; top:16px; z-index:40;
+      margin:auto; max-width:1200px; padding:0 20px;
+    }
+    .nav-inner{
+      display:flex; align-items:center; justify-content:space-between;
+      backdrop-filter: blur(var(--blur));
+      background: linear-gradient(180deg, #0f1728aa, #0c1325aa);
+      border:1px solid #ffffff14;
+      border-radius: calc(var(--radius) + 6px);
+      box-shadow: var(--shadow);
+      padding:10px 14px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--text);
+      letter-spacing:.3px;
+    }
+    .brand img{width:28px; height:28px; filter: drop-shadow(0 0 6px #7df9ff55)}
+    .brand .title{font-weight:700; font-family:"Space Grotesk", sans-serif}
+    .nav-links{display:flex; gap:8px; align-items:center}
+    .nav-links a{
+      color:var(--muted); text-decoration:none; padding:10px 14px; border-radius:12px;
+      transition: color .2s, background .2s, border-color .2s;
+      border:1px solid transparent;
+    }
+    .nav-links a:hover{color:var(--text); background:#ffffff0b; border-color:#ffffff18}
+    .nav-links a.active{color:var(--text); border-color:#7df9ff55; box-shadow: inset 0 0 0 1px #7df9ff33}
+
+    /* main glass panel */
+    .panel{
+      backdrop-filter: blur(var(--blur));
+      background: linear-gradient(180deg, var(--panel), #0b1222aa);
+      border:1px solid #ffffff1a;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:24px;
+    }
+
+    /* footer */
+    footer{
+      margin:36px auto 16px; max-width:1200px; padding:0 20px; color:var(--muted); font-size:.9rem;
+      display:flex; justify-content:space-between; align-items:center; gap:12px;
+    }
+    .chip{
+      display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px;
+      border:1px solid #ffffff14; background:#0d1426aa; backdrop-filter: blur(10px);
+      font-size:.85rem; color:var(--muted);
+    }
+    .pulse{
+      width:8px; height:8px; border-radius:50%; background:var(--success);
+      box-shadow:0 0 10px var(--success), 0 0 20px var(--success);
+      animation:pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse{
+      0%,100%{transform:scale(1); opacity:.9}
+      50%{transform:scale(1.6); opacity:.5}
+    }
+
+    /* buttons */
+    .btn{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:10px 14px; border-radius:12px; border:1px solid #7df9ff44; color:var(--text);
+      background:linear-gradient(180deg, #0e1a2faa, #0c172aaa);
+      text-decoration:none; cursor:pointer; transition:transform .06s ease, box-shadow .2s;
+      box-shadow: 0 0 0 0 rgba(125,249,255,.0);
+    }
+    .btn:hover{box-shadow: 0 0 18px 2px rgba(125,249,255,.18)}
+    .btn:active{transform: translateY(1px)}
+
+    /* headings */
+    h1,h2,h3{font-family:"Space Grotesk", sans-serif; margin:0 0 10px}
+    h1{font-size:1.8rem}
+    h2{font-size:1.3rem; color:var(--muted)}
+    p{line-height:1.6}
+
+    /* content blocks */
+    .block{margin:18px 0}
+    .grid{
+      display:grid; gap:16px;
+      grid-template-columns: repeat(12, 1fr);
+    }
+    .col-12{grid-column: span 12}
+    .col-8{grid-column: span 8}
+    .col-4{grid-column: span 4}
+    @media (max-width: 900px){ .col-8,.col-4{grid-column: span 12} }
+
+    /* subtle neon divider */
+    .divider{height:1px; background: linear-gradient(90deg, transparent, #7df9ff55, transparent)}
+  </style>
+</head>
+
+<body>
+  <div class="neon-bar"></div>
+  <div class="bg-grid" aria-hidden="true"></div>
+
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="{{ url_for('main.home') }}" class="brand">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="logo">
+        <span class="title">{{ app_name or "Neural Health Link" }}</span>
+      </a>
+      <div class="nav-links">
+        <a href="{{ url_for('main.home') }}" class="{% if request.endpoint=='main.home' %}active{% endif %}">Home</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main wrapper -->
+  <main class="wrap">
+    <section class="panel">
+      {% block content %}
+      <!-- child templates render here -->
+      {% endblock %}
+    </section>
+
+    {% block after_panel %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="chip"><span class="pulse"></span> {{ app_name or "Neural Health Link" }} · v{{ version or "1.0" }}</div>
+    <div class="chip"> {{ "By Doctigo" }}</div>
+  </footer>
+
+  {% block scripts %}
+  <script>
+    // optional client glow on focus
+    document.addEventListener('focusin', e=>{
+      const p = e.target.closest('.panel');
+      if(p){ p.style.boxShadow = '0 0 24px 2px rgba(125,249,255,.12), var(--shadow)'; }
+    });
+    document.addEventListener('focusout', e=>{
+      const p = e.target.closest('.panel');
+      if(p){ p.style.boxShadow = ''; }
+    });
+  </script>
+  {% endblock %}
+</body>
+</html>
