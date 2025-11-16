@@ -1,80 +1,90 @@
-import math
-from datetime import datetime
-from config import settings
+# /backend/utils/helpers.py
+from typing import List, Dict
 
 
-def format_percentage(prob_value):
+def get_next_patient_id(patients: List[Dict]) -> int:
     """
-    Convert a float probability (0–1) to a clean percentage string.
+    Determine the next integer patient_id based on existing rows.
+    IDs are monotonically increasing and never reused.
     """
-    if prob_value is None or prob_value == "N/A":
-        return "N/A"
-    try:
-        return f"{float(prob_value) * 100:.1f}%"
-    except (ValueError, TypeError):
-        return "N/A"
+    if not patients:
+        return 1
+    max_id = 0
+    for p in patients:
+        try:
+            pid = int(str(p.get("patient_id", "0")).strip())
+            if pid > max_id:
+                max_id = pid
+        except ValueError:
+            continue
+    return max_id + 1
 
 
-def normalize_disease_name(name: str) -> str:
+def generate_mock_vitals(patient_id: str) -> Dict:
     """
-    Normalize disease names for consistent lookups.
-    Example: ' fever ' -> 'Fever'
+    Generate deterministic mock vitals based on patient_id.
+    This keeps values stable across requests.
     """
-    return name.strip().title() if isinstance(name, str) else name
+    pid = int(str(patient_id) or "0")
 
+    # Simple deterministic formulas
+    heart_rate = 60 + (pid * 7) % 40          # 60–99
+    bp_systolic = 100 + (pid * 3) % 40        # 100–139
+    bp_diastolic = 60 + (pid * 2) % 25        # 60–84
+    spo2 = 94 + (pid * 5) % 6                 # 94–99
+    temperature = 36.5 + ((pid * 11) % 8) / 10.0  # 36.5–37.2 approx
 
-def format_date(date_str):
-    """
-    Format YYYY-MM-DD into a readable date (e.g., 2025-10-24 → 24 Oct 2025)
-    """
-    try:
-        dt = datetime.strptime(date_str, "%Y-%m-%d")
-        return dt.strftime("%d %b %Y")
-    except Exception:
-        return date_str
+    # Simple “predicted” vitals: perturb slightly
+    heart_rate_pred = heart_rate + ((pid * 13) % 5 - 2)
+    bp_systolic_pred = bp_systolic + ((pid * 17) % 6 - 3)
+    bp_diastolic_pred = bp_diastolic + ((pid * 19) % 5 - 2)
+    spo2_pred = max(90, min(99, spo2 + ((pid * 23) % 3 - 1)))
+    temperature_pred = round(temperature + ((pid * 29) % 3 - 1) * 0.1, 1)
 
-
-def combine_relations(relations_dict):
-    """
-    Prepare a user-friendly list from relation dict {disease: {prob, report}}
-    """
-    formatted = []
-    for disease, info in relations_dict.items():
-        formatted.append({
-            "previous_disease": disease,
-            "probability": format_percentage(info.get("probability")),
-            "report": info.get("report", "")
-        })
-    return formatted
-
-
-def get_state_flag(state_name):
-    """
-    Return a placeholder flag icon path for Indian states (mock).
-    """
-    base = "/static/images/icons/states/"
-    safe_name = state_name.lower().replace(" ", "_")
-    return f"{base}{safe_name}.png"
-
-
-def round_up(num, decimals=2):
-    """
-    Round a numeric value safely upward to given decimals.
-    """
-    try:
-        factor = 10 ** decimals
-        return math.ceil(num * factor) / factor
-    except Exception:
-        return num
-
-
-def get_app_info():
-    """
-    Return app metadata for templates or APIs.
-    """
     return {
-        "app": settings.APP_NAME,
-        "version": settings.VERSION,
-        "author": settings.AUTHOR,
-        "country": settings.DEFAULT_COUNTRY
+        "current": {
+            "heart_rate": heart_rate,
+            "bp_systolic": bp_systolic,
+            "bp_diastolic": bp_diastolic,
+            "spo2": spo2,
+            "temperature": round(temperature, 1),
+        },
+        "predicted": {
+            "heart_rate": heart_rate_pred,
+            "bp_systolic": bp_systolic_pred,
+            "bp_diastolic": bp_diastolic_pred,
+            "spo2": spo2_pred,
+            "temperature": temperature_pred,
+        },
     }
+
+
+def vitals_to_scores(vitals: Dict) -> List[float]:
+    """
+    Map vitals to normalized 0–1 “risk scores” for use in the bell curve.
+    Very simple monotonic mappings, purely mock.
+    """
+    cur = vitals.get("current", {})
+    scores = []
+
+    hr = cur.get("heart_rate")
+    if hr is not None:
+        scores.append(min(max((hr - 50) / 80.0, 0.0), 1.0))
+
+    sys = cur.get("bp_systolic")
+    if sys is not None:
+        scores.append(min(max((sys - 90) / 70.0, 0.0), 1.0))
+
+    dia = cur.get("bp_diastolic")
+    if dia is not None:
+        scores.append(min(max((dia - 60) / 30.0, 0.0), 1.0))
+
+    spo2 = cur.get("spo2")
+    if spo2 is not None:
+        scores.append(min(max((100 - spo2) / 20.0, 0.0), 1.0))
+
+    temp = cur.get("temperature")
+    if temp is not None:
+        scores.append(min(max((temp - 36.5) / 2.0, 0.0), 1.0))
+
+    return scores
