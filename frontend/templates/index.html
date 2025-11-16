@@ -1,40 +1,50 @@
 <!-- /frontend/templates/index.html -->
 {% extends "base.html" %}
-{% block title %}Home | {{ app_name }}{% endblock %}
+{% block title %}Dashboard | {{ app_name }}{% endblock %}
 
 {% block content %}
 <h1>Patient Dashboard</h1>
-<p>Select a patient to view their disease relations and analysis report.</p>
-<div class="divider"></div>
+<p style="margin-bottom:16px;">
+  Select a patient to view their Neural Health Link report or register a new patient.
+</p>
 
-<div class="block">
-  <form method="get" action="" id="patientForm">
-    <label for="patientSelect" style="font-weight:500;">Choose Patient:</label>
-    <select id="patientSelect" class="btn" style="min-width:200px;" onchange="navigateToPatient(this)">
-      <option value="">-- Select Patient --</option>
-      {% for p in patients %}
-      <option value="{{ p.patient_id }}">{{ p.name }} ({{ p.city }}, {{ p.state }})</option>
-      {% endfor %}
-    </select>
-  </form>
+<div class="block" style="margin-bottom:20px;">
+  <a href="{{ url_for('main.register_patient') }}" class="btn">
+    + Register New Patient
+  </a>
 </div>
 
 <div class="block">
-  <h2>System Overview</h2>
-  <p>
-    <b>Neural Health Link</b> An AGENTIC-AI diagnostic correlation tool.
-    The dataset is static and pre-filled, showing how previous diseases like <em>Fever, Cough, Headache, Shortness of Breath</em> relate statistically to a patient's current condition.
-  </p>
+  <h2>Existing Patients (Mock Dataset)</h2>
+  <div class="table-wrapper">
+    <table style="width:100%; border-collapse:collapse; font-size:0.95rem;">
+      <thead style="background:#111a2d;">
+        <tr style="text-align:left;">
+          <th style="padding:10px; border-bottom:1px solid #ffffff22;">ID</th>
+          <th style="padding:10px; border-bottom:1px solid #ffffff22;">Name</th>
+          <th style="padding:10px; border-bottom:1px solid #ffffff22;">State</th>
+          <th style="padding:10px; border-bottom:1px solid #ffffff22;">Present Disease</th>
+          <th style="padding:10px; border-bottom:1px solid #ffffff22;">Last Visit</th>
+          <th style="padding:10px; border-bottom:1px solid #ffffff22;">Report</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in patients %}
+        <tr style="background-color:#0f1725aa;">
+          <td style="padding:10px; border-bottom:1px solid #ffffff11;">{{ p.patient_id }}</td>
+          <td style="padding:10px; border-bottom:1px solid #ffffff11;">{{ p.name }}</td>
+          <td style="padding:10px; border-bottom:1px solid #ffffff11;">{{ p.state }}</td>
+          <td style="padding:10px; border-bottom:1px solid #ffffff11;">{{ p.present_disease }}</td>
+          <td style="padding:10px; border-bottom:1px solid #ffffff11;">{{ p.last_visit }}</td>
+          <td style="padding:10px; border-bottom:1px solid #ffffff11;">
+            <a href="{{ url_for('main.patient_view', patient_id=p.patient_id) }}" class="btn btn-small">
+              View Report
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
-
-
-{% endblock %}
-
-{% block after_panel %}
-<script>
-  function navigateToPatient(sel){
-    const id = sel.value;
-    if(id){ window.location.href = `/patient/${id}`; }
-  }
-</script>
 {% endblock %}
