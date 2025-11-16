@@ -1,3 +1,4 @@
+<!-- /frontend/templates/report.html -->
 {% extends "base.html" %}
 {% block title %}Report | {{ app_name }}{% endblock %}
 
@@ -29,10 +30,10 @@
         <p><b>Present Disease:</b>
           <span style="color:#7df9ff;">{{ patient.present_disease }}</span>
         </p>
-        <p><b>Previous Diseases:</b> {{ patient.previous_diseases }}</p>
+        <p><b>Previous Diseases:</b> {{ patient.previous_diseases or "None recorded" }}</p>
         <p>
-          This section analyzes how past illnesses may influence the current
-          condition using mock probabilities from the dataset.
+          This section analyzes how past illnesses and regional disease context may influence
+          the current condition using mock probabilities from the dataset.
         </p>
       </div>
     </div>
@@ -40,7 +41,7 @@
 </div>
 
 <div class="block">
-  <h2>Disease Relation Summary</h2>
+  <h2>Core Disease Relation Summary (History-based)</h2>
   <div class="grid">
     <div class="col-12">
       <table style="width:100%; border-collapse:collapse; font-size:0.95rem;">
@@ -71,7 +72,73 @@
 </div>
 
 <div class="block">
-  <h2>Visual Overview</h2>
+  <h2>State Context Causal Panel (India-only mock)</h2>
+  <p class="text-muted">
+    How common diseases in <b>{{ patient.state or "Unknown" }}</b> may act as background
+    contributors to your current condition.
+  </p>
+  <div class="grid">
+    <div class="col-12">
+      <table style="width:100%; border-collapse:collapse; font-size:0.95rem;">
+        <thead style="background:#111a2d;">
+          <tr style="text-align:left;">
+            <th style="padding:10px; border-bottom:1px solid #ffffff22;">State Disease</th>
+            <th style="padding:10px; border-bottom:1px solid #ffffff22;">Causal Probability</th>
+            <th style="padding:10px; border-bottom:1px solid #ffffff22;">Explanation</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ctx in state_context %}
+          {% set sp = ctx.probability | float %}
+          <tr style="background-color:#0f1725aa;">
+            <td style="padding:10px; border-bottom:1px solid #ffffff11;">{{ ctx.disease }}</td>
+            <td style="padding:10px; border-bottom:1px solid #ffffff11; color:#7df9ff; font-weight:600;">
+              {{ (sp * 100) | round(1) }}%
+            </td>
+            <td style="padding:10px; border-bottom:1px solid #ffffff11; color:#b8c3d9;">
+              {{ ctx.report }}
+            </td>
+          </tr>
+          {% endfor %}
+          {% if not state_context %}
+          <tr style="background-color:#0f1725aa;">
+            <td colspan="3" style="padding:10px; border-bottom:1px solid #ffffff11; color:#b8c3d9;">
+              No state-level mock data available for {{ patient.state or "this region" }}.
+            </td>
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="block">
+  <h2>Vitals Summary (Mock Prediction System)</h2>
+  <div class="grid">
+    <div class="col-6">
+      <div class="panel" style="background:#0f1725aa; border:1px solid #ffffff12; padding:16px;">
+        <h3>Current Vitals</h3>
+        <p>Heart Rate: <b>{{ vitals.current.heart_rate }}</b> bpm</p>
+        <p>Blood Pressure: <b>{{ vitals.current.bp_systolic }}/{{ vitals.current.bp_diastolic }}</b> mmHg</p>
+        <p>SpO₂: <b>{{ vitals.current.spo2 }}</b>%</p>
+        <p>Temperature: <b>{{ vitals.current.temperature }}</b> °C</p>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="panel" style="background:#0f1725aa; border:1px solid #ffffff12; padding:16px;">
+        <h3>Predicted Vitals (Mock)</h3>
+        <p>Heart Rate: <b>{{ vitals.predicted.heart_rate }}</b> bpm</p>
+        <p>Blood Pressure: <b>{{ vitals.predicted.bp_systolic }}/{{ vitals.predicted.bp_diastolic }}</b> mmHg</p>
+        <p>SpO₂: <b>{{ vitals.predicted.spo2 }}</b>%</p>
+        <p>Temperature: <b>{{ vitals.predicted.temperature }}</b> °C</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="block">
+  <h2>Combined Disease–Vitals Risk Distribution</h2>
   <canvas id="relationChart" height="120"></canvas>
 </div>
 
@@ -83,41 +150,42 @@
 {% block after_panel %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// ====== Extract relation probabilities ======
-const rawValues = [
-  {% for prev, info in relation_data.items() %}
-    {{ (info.probability | float) }},
-  {% endfor %}
-].filter(v => !isNaN(v));
+const rawValues = {{ chart_values | tojson }};
 
-// ====== Mean & Standard Deviation ======
+// Filter out invalid values
+const cleanValues = rawValues.filter(v => typeof v === 'number' && !isNaN(v) && v >= 0);
+
+// Fallback to a dummy small set if empty
+const values = cleanValues.length ? cleanValues : [0.2, 0.5, 0.8];
+
 function mean(arr){return arr.reduce((a,b)=>a+b,0)/arr.length;}
 function std(arr,m){return Math.sqrt(arr.reduce((a,b)=>a+Math.pow(b-m,2),0)/arr.length);}
-const m = rawValues.length ? mean(rawValues) : 0;
-const s = rawValues.length ? std(rawValues,m) : 0.01;
 
-// ====== Gaussian generator ======
+const m = mean(values);
+const s = std(values, m) || 0.01;
+
 function gaussian(x,mean,std){
   const exp = -((x-mean)**2)/(2*std**2);
   return (1/(std*Math.sqrt(2*Math.PI)))*Math.exp(exp);
 }
 
-// ====== Generate bell data ======
-const xs=[], ys=[];
-for(let x=0;x<=1;x+=0.01){xs.push(x);ys.push(gaussian(x,m,s));}
-const yMax=Math.max(...ys);
-const scaledYs=ys.map(v=>(v/yMax)*100);
+const xs = [], ys = [];
+for(let x=0;x<=1;x+=0.01){
+  xs.push(x);
+  ys.push(gaussian(x,m,s));
+}
+const yMax = Math.max(...ys);
+const scaledYs = ys.map(v => (v / yMax) * 100);
 
-// ====== Chart.js setup ======
-const ctx=document.getElementById('relationChart');
+const ctx = document.getElementById('relationChart');
 new Chart(ctx,{
   type:'line',
   data:{
-    labels:xs.map(x=>(x*100).toFixed(0)),
+    labels: xs.map(x => (x*100).toFixed(0)),
     datasets:[
       {
-        label:'Normal Distribution of Relation Probabilities',
-        data:scaledYs,
+        label:'Combined Disease–Vitals Risk Distribution',
+        data: scaledYs,
         borderColor:'rgba(125,249,255,0.9)',
         backgroundColor:'rgba(125,249,255,0.2)',
         fill:true,
@@ -134,14 +202,14 @@ new Chart(ctx,{
         titleColor:'#7df9ff',
         bodyColor:'#e6eef8',
         callbacks:{
-          title:ctx=>`Probability: ${ctx[0].label}%`,
-          label:ctx=>`Density: ${ctx.parsed.y.toFixed(3)}`
+          title:ctx => `Probability: ${ctx[0].label}%`,
+          label:ctx => `Relative density: ${ctx.parsed.y.toFixed(3)}`
         }
       }
     },
     scales:{
       x:{
-        title:{display:true,text:'Relation Probability (%)',color:'#7df9ff'},
+        title:{display:true,text:'Risk Level (%)',color:'#7df9ff'},
         ticks:{color:'#99a3b7'},
         grid:{color:'#1b2340'}
       },
@@ -154,15 +222,14 @@ new Chart(ctx,{
   }
 });
 
-// ====== Summary section ======
-const statsDiv=document.createElement('div');
+const statsDiv = document.createElement('div');
 statsDiv.style.color='#b8c3d9';
 statsDiv.style.marginTop='10px';
 statsDiv.style.textAlign='center';
 statsDiv.style.fontSize='0.95rem';
-statsDiv.innerHTML=`
+statsDiv.innerHTML = `
   <b>Statistical Summary:</b><br>
-  Mean Probability = <span style="color:#7df9ff;">${(m*100).toFixed(2)}%</span>,
+  Mean Combined Risk = <span style="color:#7df9ff;">${(m*100).toFixed(2)}%</span>,
   Standard Deviation = <span style="color:#a78bfa;">${(s*100).toFixed(2)}%</span>
 `;
 document.querySelector('.block:last-of-type').appendChild(statsDiv);
