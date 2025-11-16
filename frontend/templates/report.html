@@ -30,7 +30,6 @@
         <p><b>Present Disease:</b>
           <span style="color:#7df9ff;">{{ patient.present_disease }}</span>
         </p>
-        <p><b>Previous Diseases:</b> {{ patient.previous_diseases or "None recorded" }}</p>
         <p>
           This section analyzes how past illnesses and regional disease context may influence
           the current condition using mock probabilities from the dataset.
@@ -72,7 +71,7 @@
 </div>
 
 <div class="block">
-  <h2>State Context Causal Panel (India-only mock)</h2>
+  <h2>State Context Causal Panel</h2>
   <p class="text-muted">
     How common diseases in <b>{{ patient.state or "Unknown" }}</b> may act as background
     contributors to your current condition.
@@ -114,7 +113,7 @@
 </div>
 
 <div class="block">
-  <h2>Vitals Summary (Mock Prediction System)</h2>
+  <h2>Vitals Summary</h2>
   <div class="grid">
     <div class="col-6">
       <div class="panel" style="background:#0f1725aa; border:1px solid #ffffff12; padding:16px;">
@@ -127,7 +126,7 @@
     </div>
     <div class="col-6">
       <div class="panel" style="background:#0f1725aa; border:1px solid #ffffff12; padding:16px;">
-        <h3>Predicted Vitals (Mock)</h3>
+        <h3>Predicted Vitals</h3>
         <p>Heart Rate: <b>{{ vitals.predicted.heart_rate }}</b> bpm</p>
         <p>Blood Pressure: <b>{{ vitals.predicted.bp_systolic }}/{{ vitals.predicted.bp_diastolic }}</b> mmHg</p>
         <p>SpO₂: <b>{{ vitals.predicted.spo2 }}</b>%</p>

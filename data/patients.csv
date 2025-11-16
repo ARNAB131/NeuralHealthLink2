@@ -4,3 +4,4 @@ patient_id,name,age,gender,city,state,last_visit,present_disease,previous_diseas
 1003,Aarav Singh,29,Male,Delhi,Delhi,2025-08-30,Headache,Cold|Cough|Fever
 1004,Kavita Das,50,Female,Kolkata,West Bengal,2025-09-10,Chest Pain,Shortness of Breath|Fatigue
 1005,Rakesh Mehta,60,Male,Jaipur,Rajasthan,2025-10-10,Cough,Fever|Body Ache
+1006,Arush Kumar,25,Male,Silchar,Assam,2025-02-15,Fever,
