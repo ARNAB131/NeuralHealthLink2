@@ -1,6 +1,6 @@
 <!-- /frontend/templates/base.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ current_language or 'en' }}">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -79,6 +79,7 @@
       border-radius: calc(var(--radius) + 6px);
       box-shadow: var(--shadow);
       padding:10px 14px;
+      gap:12px;
     }
     .brand{
       display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--text);
@@ -86,6 +87,12 @@
     }
     .brand img{width:28px; height:28px; filter: drop-shadow(0 0 6px #7df9ff55)}
     .brand .title{font-weight:700; font-family:"Space Grotesk", sans-serif}
+
+    .nav-right{
+      display:flex; align-items:center; gap:12px;
+      margin-left:auto;
+    }
+
     .nav-links{display:flex; gap:8px; align-items:center}
     .nav-links a{
       color:var(--muted); text-decoration:none; padding:10px 14px; border-radius:12px;
@@ -94,6 +101,28 @@
     }
     .nav-links a:hover{color:var(--text); background:#ffffff0b; border-color:#ffffff18}
     .nav-links a.active{color:var(--text); border-color:#7df9ff55; box-shadow: inset 0 0 0 1px #7df9ff33}
+
+    /* language selector */
+    .lang-form{
+      display:flex; align-items:center; gap:6px;
+      font-size:.8rem; color:var(--muted);
+    }
+    .lang-label{
+      font-size:.75rem; color:var(--muted);
+    }
+    .lang-select{
+      background:#020617;
+      color:var(--text);
+      border:1px solid #4b5563;
+      border-radius:6px;
+      padding:4px 8px;
+      font-size:.8rem;
+      outline:none;
+    }
+    .lang-select:focus{
+      border-color:var(--neon);
+      box-shadow:0 0 0 1px rgba(125,249,255,.4);
+    }
 
     /* main glass panel */
     .panel{
@@ -151,14 +180,18 @@
     .col-12{grid-column: span 12}
     .col-8{grid-column: span 8}
     .col-4{grid-column: span 4}
-    @media (max-width: 900px){ .col-8,.col-4{grid-column: span 12} }
+    @media (max-width: 900px){
+      .col-8,.col-4{grid-column: span 12}
+      .nav-inner{flex-wrap:wrap}
+      .nav-right{width:100%; justify-content:flex-end; flex-wrap:wrap;}
+    }
 
     /* subtle neon divider */
     .divider{height:1px; background: linear-gradient(90deg, transparent, #7df9ff55, transparent)}
   </style>
 </head>
 
-<body>
+<body data-lang="{{ current_language or 'en' }}">
   <div class="neon-bar"></div>
   <div class="bg-grid" aria-hidden="true"></div>
 
@@ -169,8 +202,27 @@
         <img src="{{ url_for('static', filename='images/logo.png') }}" alt="logo">
         <span class="title">{{ app_name or "Neural Health Link" }}</span>
       </a>
-      <div class="nav-links">
-        <a href="{{ url_for('main.home') }}" class="{% if request.endpoint=='main.home' %}active{% endif %}">Home</a>
+
+      <div class="nav-right">
+        <div class="nav-links">
+          <a href="{{ url_for('main.home') }}" class="{% if request.endpoint=='main.home' %}active{% endif %}">
+            {{ t('nav_home') if t is defined else 'Home' }}
+          </a>
+        </div>
+
+        <!-- Language selector -->
+        <form method="post" action="{{ url_for('main.set_language') }}" class="lang-form">
+          <label for="lang-select" class="lang-label">
+            {{ t('lang_label') if t is defined else 'Language' }}
+          </label>
+          <select id="lang-select" name="lang" class="lang-select" onchange="this.form.submit()">
+            {% for code, label in supported_languages.items() %}
+              <option value="{{ code }}" {% if code == current_language %}selected{% endif %}>
+                {{ label }}
+              </option>
+            {% endfor %}
+          </select>
+        </form>
       </div>
     </div>
   </nav>
@@ -188,11 +240,16 @@
 
   <!-- Footer -->
   <footer>
-    <div class="chip"><span class="pulse"></span> {{ app_name or "Neural Health Link" }} · v{{ version or "1.0" }}</div>
-    <div class="chip"> {{ "By Doctigo" }}</div>
+    <div class="chip">
+      <span class="pulse"></span>
+      {{ app_name or "Neural Health Link" }} · v{{ version or "1.0" }}
+    </div>
+    <div class="chip">By Doctigo</div>
   </footer>
 
   {% block scripts %}
+  <!-- main UI JS (voice, etc.) -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
   <script>
     // optional client glow on focus
     document.addEventListener('focusin', e=>{
