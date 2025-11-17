@@ -1,26 +1,71 @@
+# config/settings.py
 import os
+from pathlib import Path
 
-# Base application settings
+BASE_DIR = Path(__file__).resolve().parents[1]
+
 APP_NAME = "Neural Health Link"
-VERSION = "1.0"
+VERSION = "1.1"
+AUTHOR = "Doctigo"
+DEFAULT_COUNTRY = "India"
 
-# Hosting / Server config
 HOST = "0.0.0.0"
 PORT = int(os.getenv("PORT", 8080))
 DEBUG = True
 
-# Security
-SECRET_KEY = os.getenv("SECRET_KEY", "super-secret-dev-key")  # <-- ADD THIS
+SECRET_KEY = os.getenv("SECRET_KEY", "super-secret-dev-key")
 
-# Default metadata
-AUTHOR = "Doctigo"
-DEFAULT_COUNTRY = "India"
+DATA_DIR = BASE_DIR / "data"
+PATIENTS_CSV = DATA_DIR / "patients.csv"
+DISEASES_CSV = DATA_DIR / "diseases.csv"
+RELATIONS_JSON = DATA_DIR / "relations.json"
+STATE_DISEASES_JSON = DATA_DIR / "state_diseases.json"
+MOCK_HISTORY_DISEASES_JSON = DATA_DIR / "mock_history_diseases.json"
+PATIENT_HISTORY_JSON = DATA_DIR / "patient_history.json"
 
-# Data paths
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR = os.path.join(os.path.dirname(BASE_DIR), "data")
+TRANSLATIONS_DIR = DATA_DIR / "translations"
+DEFAULT_LANGUAGE = "en"
+SUPPORTED_LANGUAGES = {
+    "en": "English",
 
-PATIENTS_CSV = os.path.join(DATA_DIR, "patients.csv")
-DISEASES_CSV = os.path.join(DATA_DIR, "diseases.csv")
-RELATIONS_JSON = os.path.join(DATA_DIR, "relations.json")
-STATE_DISEASES_JSON = os.path.join(DATA_DIR, "state_diseases.json")  # new
+    # 22 Official Indian Languages
+    "hi": "Hindi",
+    "bn": "Bengali",
+    "as": "Assamese",
+    "or": "Odia",
+    "ta": "Tamil",
+    "te": "Telugu",
+    "kn": "Kannada",
+    "ml": "Malayalam",
+    "gu": "Gujarati",
+    "pa": "Punjabi",
+    "mr": "Marathi",
+    "ne": "Nepali",
+    "ks": "Kashmiri",
+    "kok": "Konkani",
+    "mai": "Maithili",
+    "sd": "Sindhi",
+    "ur": "Urdu",
+    "sa": "Sanskrit",
+    "bo": "Tibetan",
+    "mni": "Manipuri",
+    "bho": "Bhojpuri",
+    "doi": "Dogri",
+    "sat": "Santali",
+    "raj": "Rajasthani",   # Widely spoken, not Eighth Schedule but needed
+
+    # Additional Indian languages (non-official but widely spoken)
+    "brx": "Bodo",
+    "lmn": "Lambani",
+    "hmr": "Hmar",
+    "mz": "Mizo",
+    "nag": "Nagamese",
+    "trp": "Tripuri",
+    "gon": "Gondi",
+    "kha": "Khasi",
+    "grt": "Garo",
+    "lep": "Lepcha"
+}
+
+UPLOAD_DIR = BASE_DIR / "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
