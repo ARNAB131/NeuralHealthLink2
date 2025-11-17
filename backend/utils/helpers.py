@@ -1,5 +1,9 @@
 # /backend/utils/helpers.py
 from typing import List, Dict
+from datetime import datetime, timedelta
+from pathlib import Path
+import json
+import random
 
 
 def get_next_patient_id(patients: List[Dict]) -> int:
@@ -65,7 +69,7 @@ def vitals_to_scores(vitals: Dict) -> List[float]:
     Very simple monotonic mappings, purely mock.
     """
     cur = vitals.get("current", {})
-    scores = []
+    scores: List[float] = []
 
     hr = cur.get("heart_rate")
     if hr is not None:
@@ -88,3 +92,79 @@ def vitals_to_scores(vitals: Dict) -> List[float]:
         scores.append(min(max((temp - 36.5) / 2.0, 0.0), 1.0))
 
     return scores
+
+
+# ---------- new generic JSON helpers ----------
+
+def load_json(path: Path) -> dict:
+    """
+    Safely load JSON from a given path. Returns {} on error.
+    """
+    if not path.exists():
+        return {}
+    try:
+        with open(path, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def save_json(path: Path, data: dict) -> None:
+    """
+    Safely save JSON to a given path, creating parent dirs if needed.
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+# ---------- new auto-history generator ----------
+
+def generate_auto_history(
+    patient_id: str,
+    present_disease: str,
+    last_visit_str: str,
+    master_diseases: List[str],
+    count: int = 5,
+) -> List[Dict]:
+    """
+    Generate deterministic mock past diseases (auto-history) with dates
+    strictly before the given last_visit date.
+
+    Returns a list of dicts:
+      {
+        "disease": <str>,
+        "diagnosed_on": "YYYY-MM-DD",
+        "source": "auto"
+      }
+    """
+    if not master_diseases:
+        return []
+
+    # Parse last_visit; fall back to "now" if invalid
+    try:
+        last_visit = datetime.strptime(last_visit_str, "%Y-%m-%d")
+    except Exception:
+        last_visit = datetime.now()
+
+    # Deterministic randomness per patient + present disease
+    random.seed(f"auto-history-{patient_id}-{present_disease}-{last_visit_str}")
+
+    # Pick distinct diseases
+    choices = random.sample(master_diseases, k=min(count, len(master_diseases)))
+
+    history: List[Dict] = []
+    for idx, d in enumerate(choices, start=1):
+        # Spread dates backward in time, further for later entries
+        days_back = random.randint(30 * idx, 180 * idx)
+        diag_date = last_visit - timedelta(days=days_back)
+
+        history.append(
+            {
+                "disease": d,
+                "diagnosed_on": diag_date.strftime("%Y-%m-%d"),
+                "source": "auto",
+            }
+        )
+
+    return history
