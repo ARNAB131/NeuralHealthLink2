@@ -10,6 +10,7 @@
 </p>
 <div class="divider"></div>
 
+<!-- ================= PATIENT OVERVIEW ================= -->
 <div class="block">
   <h2>Patient Overview</h2>
   <div class="grid">
@@ -31,14 +32,16 @@
           <span style="color:#7df9ff;">{{ patient.present_disease }}</span>
         </p>
         <p>
-          This section analyzes how past illnesses and regional disease context may influence
-          the current condition using mock probabilities from the dataset.
+          This section analyzes how past illnesses, uploaded medical reports,
+          regional disease context and vitals may influence the current condition
+          using mock probabilities from the dataset.
         </p>
       </div>
     </div>
   </div>
 </div>
 
+<!-- ================= CORE RELATION SUMMARY ================= -->
 <div class="block">
   <h2>Core Disease Relation Summary (History-based)</h2>
   <div class="grid">
@@ -53,28 +56,39 @@
         </thead>
         <tbody>
           {% for prev, info in relation_data.items() %}
-            {% set p = info.probability | float %}
-            <tr style="background-color:#0f1725aa;">
-              <td style="padding:10px; border-bottom:1px solid #ffffff11;">{{ prev }}</td>
-              <td style="padding:10px; border-bottom:1px solid #ffffff11; color:#7df9ff; font-weight:600;">
-                {% if p > 0 %}{{ (p * 100) | round(1) }}%{% else %}N/A{% endif %}
-              </td>
-              <td style="padding:10px; border-bottom:1px solid #ffffff11; color:#b8c3d9;">
-                {{ info.report }}
-              </td>
-            </tr>
+          <tr style="background-color:#0f1725aa;">
+            <td style="padding:10px; border-bottom:1px solid #ffffff11;">{{ prev }}</td>
+            <td style="padding:10px; border-bottom:1px solid #ffffff11; color:#7df9ff; font-weight:600;">
+              {% if info.probability %}
+                {{ (info.probability * 100) | round(1) }}%
+              {% else %}
+                N/A
+              {% endif %}
+            </td>
+            <td style="padding:10px; border-bottom:1px solid #ffffff11; color:#b8c3d9;">
+              {{ info.report }}
+            </td>
+          </tr>
           {% endfor %}
+          {% if not relation_data %}
+          <tr style="background-color:#0f1725aa;">
+            <td colspan="3" style="padding:10px; border-bottom:1px solid #ffffff11; color:#b8c3d9;">
+              No relation data available for this patient.
+            </td>
+          </tr>
+          {% endif %}
         </tbody>
       </table>
     </div>
   </div>
 </div>
 
+<!-- ================= STATE CONTEXT ================= -->
 <div class="block">
   <h2>State Context Causal Panel</h2>
   <p class="text-muted">
     How common diseases in <b>{{ patient.state or "Unknown" }}</b> may act as background
-    contributors to your current condition.
+    contributors to the current condition.
   </p>
   <div class="grid">
     <div class="col-12">
@@ -88,11 +102,10 @@
         </thead>
         <tbody>
           {% for ctx in state_context %}
-          {% set sp = ctx.probability | float %}
           <tr style="background-color:#0f1725aa;">
             <td style="padding:10px; border-bottom:1px solid #ffffff11;">{{ ctx.disease }}</td>
             <td style="padding:10px; border-bottom:1px solid #ffffff11; color:#7df9ff; font-weight:600;">
-              {{ (sp * 100) | round(1) }}%
+              {{ (ctx.probability * 100) | round(1) }}%
             </td>
             <td style="padding:10px; border-bottom:1px solid #ffffff11; color:#b8c3d9;">
               {{ ctx.report }}
@@ -112,6 +125,87 @@
   </div>
 </div>
 
+<!-- ================= AUTO-GENERATED HISTORY ================= -->
+<div class="block">
+  <h2>Auto-Generated Past Disease History</h2>
+  <div class="grid">
+    <div class="col-12">
+      <table style="width:100%; border-collapse:collapse; font-size:0.95rem;">
+        <thead style="background:#111a2d;">
+          <tr style="text-align:left;">
+            <th style="padding:10px; border-bottom:1px solid #ffffff22;">Disease</th>
+            <th style="padding:10px; border-bottom:1px solid #ffffff22;">Diagnosed On</th>
+            <th style="padding:10px; border-bottom:1px solid #ffffff22;">Causal Probability</th>
+            <th style="padding:10px; border-bottom:1px solid #ffffff22;">Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for h in auto_history %}
+          <tr style="background-color:#0f1725aa;">
+            <td style="padding:10px; border-bottom:1px solid #ffffff11;">{{ h.disease }}</td>
+            <td style="padding:10px; border-bottom:1px solid #ffffff11;">{{ h.diagnosed_on }}</td>
+            <td style="padding:10px; border-bottom:1px solid #ffffff11; color:#7df9ff;">
+              {{ (h.probability * 100) | round(1) }}%
+            </td>
+            <td style="padding:10px; border-bottom:1px solid #ffffff11; color:#b8c3d9;">
+              {{ h.report }}
+            </td>
+          </tr>
+          {% endfor %}
+          {% if not auto_history %}
+          <tr style="background-color:#0f1725aa;">
+            <td colspan="4" style="padding:10px; border-bottom:1px solid #ffffff11; color:#b8c3d9;">
+              No auto-generated history for this patient.
+            </td>
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ================= UPLOADED REPORT HISTORY ================= -->
+<div class="block">
+  <h2>Diseases from Uploaded Medical Report</h2>
+  <div class="grid">
+    <div class="col-12">
+      <table style="width:100%; border-collapse:collapse; font-size:0.95rem;">
+        <thead style="background:#111a2d;">
+          <tr style="text-align:left;">
+            <th style="padding:10px; border-bottom:1px solid #ffffff22;">Disease</th>
+            <th style="padding:10px; border-bottom:1px solid #ffffff22;">Report Date</th>
+            <th style="padding:10px; border-bottom:1px solid #ffffff22;">Causal Probability</th>
+            <th style="padding:10px; border-bottom:1px solid #ffffff22;">Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for h in report_history %}
+          <tr style="background-color:#0f1725aa;">
+            <td style="padding:10px; border-bottom:1px solid #ffffff11;">{{ h.disease }}</td>
+            <td style="padding:10px; border-bottom:1px solid #ffffff11;">{{ h.diagnosed_on }}</td>
+            <td style="padding:10px; border-bottom:1px solid #ffffff11; color:#7df9ff;">
+              {{ (h.probability * 100) | round(1) }}%
+            </td>
+            <td style="padding:10px; border-bottom:1px solid #ffffff11; color:#b8c3d9;">
+              {{ h.report }}
+            </td>
+          </tr>
+          {% endfor %}
+          {% if not report_history %}
+          <tr style="background-color:#0f1725aa;">
+            <td colspan="4" style="padding:10px; border-bottom:1px solid #ffffff11; color:#b8c3d9;">
+              No uploaded report data available for this patient.
+            </td>
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ================= VITALS SUMMARY ================= -->
 <div class="block">
   <h2>Vitals Summary</h2>
   <div class="grid">
@@ -136,6 +230,7 @@
   </div>
 </div>
 
+<!-- ================= BELL CURVE ================= -->
 <div class="block">
   <h2>Combined Disease–Vitals Risk Distribution</h2>
   <canvas id="relationChart" height="120"></canvas>
