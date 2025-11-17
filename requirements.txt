@@ -1,19 +1,34 @@
 # --- Core web framework ---
 Flask==3.0.3
+Werkzeug==3.0.3
 
 # --- Data handling ---
 pandas==2.2.2
 numpy==1.26.4
 
-# --- Visualization (used by Chart.js via CDN, but keep optional plotting support) ---
+# --- OCR + PDF Processing (for medical report upload) ---
+pytesseract==0.3.10
+pdf2image==1.17.0
+Pillow==10.4.0
+
+# --- Visualization (optional local plots; Chart.js used on front-end) ---
 matplotlib==3.9.2
+
+# --- Multilingual support ---
+Babel==2.15.0
 
 # --- Utilities ---
 python-dotenv==1.0.1
+
+# --- For reading PDF text directly (fallback) ---
+PyPDF2==3.0.1
+
+# --- Optional (for safe async file handling) ---
+aiofiles==24.1.0
 
 # --- Testing ---
 pytest==8.3.3
 pytest-flask==1.3.0
 
-# --- Optional (for static analysis and safety) ---
+# --- Static analysis (optional) ---
 flake8==7.1.1
