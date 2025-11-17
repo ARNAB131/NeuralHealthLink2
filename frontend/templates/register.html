@@ -1,61 +1,88 @@
 <!-- /frontend/templates/register.html -->
 {% extends "base.html" %}
-{% block title %}Register Patient | {{ app_name }}{% endblock %}
+{% block title %}{{ t('register_title') }} | {{ app_name }}{% endblock %}
 
 {% block content %}
-<h1>Register New Patient</h1>
+<h1>{{ t('register_heading') }}</h1>
 <p style="margin-bottom:16px;">
-  Fill the form below to create a new mock patient record. A unique lifetime Patient ID
-  will be generated automatically.
+  {{ t('register_intro') }}
 </p>
 
 <div class="block">
-  <form method="post" class="glass-panel">
+  <form method="post" enctype="multipart/form-data" class="glass-panel">
     <div class="grid">
       <div class="col-6">
-        <label class="field-label">Full Name</label>
-        <input type="text" name="name" required class="field-input" placeholder="e.g., Rohan Sharma" />
+        <label class="field-label">{{ t('field_name') }}</label>
+        <div class="field-with-mic">
+          <input type="text" name="name" required class="field-input" placeholder="{{ t('placeholder_name') }}" data-voice-target="name" />
+          <button type="button" class="mic-btn" data-voice="name">🎤</button>
+        </div>
       </div>
       <div class="col-3">
-        <label class="field-label">Age</label>
-        <input type="number" name="age" min="0" max="120" class="field-input" />
+        <label class="field-label">{{ t('field_age') }}</label>
+        <div class="field-with-mic">
+          <input type="number" name="age" min="0" max="120" class="field-input" data-voice-target="age" />
+          <button type="button" class="mic-btn" data-voice="age">🎤</button>
+        </div>
       </div>
       <div class="col-3">
-        <label class="field-label">Gender</label>
+        <label class="field-label">{{ t('field_gender') }}</label>
         <select name="gender" class="field-input">
-          <option value="">Select</option>
-          <option>Male</option>
-          <option>Female</option>
-          <option>Other</option>
+          <option value="">{{ t('gender_select') }}</option>
+          <option>{{ t('gender_male') }}</option>
+          <option>{{ t('gender_female') }}</option>
+          <option>{{ t('gender_other') }}</option>
         </select>
       </div>
     </div>
 
     <div class="grid">
       <div class="col-4">
-        <label class="field-label">City</label>
-        <input type="text" name="city" class="field-input" placeholder="e.g., Kolkata" />
+        <label class="field-label">{{ t('field_city') }}</label>
+        <div class="field-with-mic">
+          <input type="text" name="city" class="field-input" placeholder="{{ t('placeholder_city') }}" data-voice-target="city" />
+          <button type="button" class="mic-btn" data-voice="city">🎤</button>
+        </div>
       </div>
       <div class="col-4">
-        <label class="field-label">State (India)</label>
-        <input type="text" name="state" class="field-input" placeholder="e.g., West Bengal" required />
+        <label class="field-label">{{ t('field_state') }}</label>
+        <div class="field-with-mic">
+          <input type="text" name="state" class="field-input" placeholder="{{ t('placeholder_state') }}" required data-voice-target="state" />
+          <button type="button" class="mic-btn" data-voice="state">🎤</button>
+        </div>
       </div>
       <div class="col-4">
-        <label class="field-label">Last Visit (YYYY-MM-DD)</label>
-        <input type="text" name="last_visit" class="field-input" placeholder="2025-10-28" />
+        <label class="field-label">{{ t('field_last_visit') }}</label>
+        <div class="field-with-mic">
+          <input type="text" name="last_visit" class="field-input" placeholder="2025-10-28" data-voice-target="last_visit" />
+          <button type="button" class="mic-btn" data-voice="last_visit">🎤</button>
+        </div>
       </div>
     </div>
 
     <div class="grid">
       <div class="col-12">
-        <label class="field-label">Present Disease</label>
-        <input type="text" name="present_disease" class="field-input" placeholder="e.g., Fever" required />
+        <label class="field-label">{{ t('field_present_disease') }}</label>
+        <div class="field-with-mic">
+          <input type="text" name="present_disease" class="field-input" placeholder="{{ t('placeholder_present_disease') }}" required data-voice-target="present_disease" />
+          <button type="button" class="mic-btn" data-voice="present_disease">🎤</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid" style="margin-top:16px;">
+      <div class="col-12">
+        <label class="field-label">{{ t('field_report_upload') }}</label>
+        <input type="file" name="report_file" accept=".pdf,.jpg,.jpeg" class="field-input" />
+        <p class="text-muted" style="font-size:0.8rem;">
+          {{ t('upload_hint') }}
+        </p>
       </div>
     </div>
 
     <div style="margin-top:20px; display:flex; gap:10px;">
-      <button type="submit" class="btn">Register &amp; Generate Patient ID</button>
-      <a href="{{ url_for('main.home') }}" class="btn btn-secondary">Cancel</a>
+      <button type="submit" class="btn">{{ t('btn_register') }}</button>
+      <a href="{{ url_for('main.home') }}" class="btn btn-secondary">{{ t('btn_cancel') }}</a>
     </div>
   </form>
 </div>
