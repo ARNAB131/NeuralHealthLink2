@@ -7,7 +7,7 @@ BASE_DIR = Path(__file__).resolve().parents[1]
 APP_NAME = "Neural Health Link"
 VERSION = "1.2"
 
-HOST = "0.0.0.0"
+HOST = "0.0.0.0"delete my project
 PORT = int(os.getenv("PORT", 8080))
 
 SECRET_KEY = os.getenv("SECRET_KEY", "super-secret-dev-key")
