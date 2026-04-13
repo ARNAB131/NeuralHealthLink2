@@ -1,13 +1,14 @@
 {
-  "functions": {
-    "app.py": {
-      "runtime": "python3.12"
-    }
-  },
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "routes": [
     {
       "src": "/(.*)",
       "dest": "app.py"
     }
-  ]
+  ],
+  "functions": {
+    "app.py": {
+      "excludeFiles": "{tests/**,__tests__/**,**/*.test.py,**/test_*.py,.git/**,.venv/**,venv/**,env/**,__pycache__/**,**/*.pyc}"
+    }
+  }
 }
