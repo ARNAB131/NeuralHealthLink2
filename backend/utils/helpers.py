@@ -1,4 +1,4 @@
-# /backend/utils/helpers.py
+# backend/utils/helpers.py
 from typing import List, Dict
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -7,10 +7,6 @@ import random
 
 
 def get_next_patient_id(patients: List[Dict]) -> int:
-    """
-    Determine the next integer patient_id based on existing rows.
-    IDs are monotonically increasing and never reused.
-    """
     if not patients:
         return 1
     max_id = 0
@@ -25,20 +21,14 @@ def get_next_patient_id(patients: List[Dict]) -> int:
 
 
 def generate_mock_vitals(patient_id: str) -> Dict:
-    """
-    Generate deterministic mock vitals based on patient_id.
-    This keeps values stable across requests.
-    """
     pid = int(str(patient_id) or "0")
 
-    # Simple deterministic formulas
-    heart_rate = 60 + (pid * 7) % 40          # 60–99
-    bp_systolic = 100 + (pid * 3) % 40        # 100–139
-    bp_diastolic = 60 + (pid * 2) % 25        # 60–84
-    spo2 = 94 + (pid * 5) % 6                 # 94–99
-    temperature = 36.5 + ((pid * 11) % 8) / 10.0  # 36.5–37.2 approx
+    heart_rate = 60 + (pid * 7) % 40
+    bp_systolic = 100 + (pid * 3) % 40
+    bp_diastolic = 60 + (pid * 2) % 25
+    spo2 = 94 + (pid * 5) % 6
+    temperature = 36.5 + ((pid * 11) % 8) / 10.0
 
-    # Simple “predicted” vitals: perturb slightly
     heart_rate_pred = heart_rate + ((pid * 13) % 5 - 2)
     bp_systolic_pred = bp_systolic + ((pid * 17) % 6 - 3)
     bp_diastolic_pred = bp_diastolic + ((pid * 19) % 5 - 2)
@@ -64,10 +54,6 @@ def generate_mock_vitals(patient_id: str) -> Dict:
 
 
 def vitals_to_scores(vitals: Dict) -> List[float]:
-    """
-    Map vitals to normalized 0–1 “risk scores” for use in the bell curve.
-    Very simple monotonic mappings, purely mock.
-    """
     cur = vitals.get("current", {})
     scores: List[float] = []
 
@@ -94,32 +80,6 @@ def vitals_to_scores(vitals: Dict) -> List[float]:
     return scores
 
 
-# ---------- new generic JSON helpers ----------
-
-def load_json(path: Path) -> dict:
-    """
-    Safely load JSON from a given path. Returns {} on error.
-    """
-    if not path.exists():
-        return {}
-    try:
-        with open(path, encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
-        return {}
-
-
-def save_json(path: Path, data: dict) -> None:
-    """
-    Safely save JSON to a given path, creating parent dirs if needed.
-    """
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
-
-# ---------- new auto-history generator ----------
-
 def generate_auto_history(
     patient_id: str,
     present_disease: str,
@@ -127,38 +87,21 @@ def generate_auto_history(
     master_diseases: List[str],
     count: int = 5,
 ) -> List[Dict]:
-    """
-    Generate deterministic mock past diseases (auto-history) with dates
-    strictly before the given last_visit date.
-
-    Returns a list of dicts:
-      {
-        "disease": <str>,
-        "diagnosed_on": "YYYY-MM-DD",
-        "source": "auto"
-      }
-    """
     if not master_diseases:
         return []
 
-    # Parse last_visit; fall back to "now" if invalid
     try:
         last_visit = datetime.strptime(last_visit_str, "%Y-%m-%d")
     except Exception:
         last_visit = datetime.now()
 
-    # Deterministic randomness per patient + present disease
     random.seed(f"auto-history-{patient_id}-{present_disease}-{last_visit_str}")
-
-    # Pick distinct diseases
     choices = random.sample(master_diseases, k=min(count, len(master_diseases)))
 
     history: List[Dict] = []
     for idx, d in enumerate(choices, start=1):
-        # Spread dates backward in time, further for later entries
         days_back = random.randint(30 * idx, 180 * idx)
         diag_date = last_visit - timedelta(days=days_back)
-
         history.append(
             {
                 "disease": d,
